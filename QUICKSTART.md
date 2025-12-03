@@ -1,6 +1,8 @@
 # Quick Start Guide
 
-Get SportsMatch AI Backend running in 5 minutes!
+Get SportsMatch AI Backend running in under 2 minutes with **zero configuration**! 🚀
+
+The app now works out of the box with sensible defaults - no database or environment setup required for development.
 
 ## Prerequisites Check
 
@@ -40,23 +42,28 @@ CREATE DATABASE sportsmatch;
 
 If you don't want to set up PostgreSQL right now, just skip to step 3! The app will automatically detect that PostgreSQL is unavailable and use an in-memory mock database with sample teams, players, and matches.
 
-### 3. Configure Environment
+### 3. Configure Environment (Optional)
 
-Create a `.env` file in the root directory:
+💡 **Ultra Quick Start:** You can skip this step entirely! The app will use sensible defaults:
+- Default JWT_SECRET for development (with security warning)
+- Mock database if PostgreSQL not available
+- Default Redis settings
+
+If you want to customize, create a `.env` file in the root directory:
 
 ```env
 PORT=3000
 NODE_ENV=development
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/sportsmatch?schema=public"
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-JWT_EXPIRES_IN=7d
-REDIS_HOST=localhost
-REDIS_PORT=6379
-OPENAI_API_KEY=your-openai-api-key-here
-CORS_ORIGIN=http://localhost:3000
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/sportsmatch?schema=public"  # Optional
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production  # Optional - uses default if not set
+JWT_EXPIRES_IN=7d  # Optional
+REDIS_HOST=localhost  # Optional
+REDIS_PORT=6379  # Optional
+OPENAI_API_KEY=your-openai-api-key-here  # Optional
+CORS_ORIGIN=http://localhost:3000  # Optional
 ```
 
-**Note:** Update `DATABASE_URL` with your PostgreSQL credentials.
+**Note:** Update `DATABASE_URL` with your PostgreSQL credentials if using PostgreSQL.
 
 ### 4. Initialize Database (Only if using PostgreSQL)
 
@@ -87,10 +94,12 @@ You should see one of these:
 ✅ Redis connected
 ```
 
-OR if using mock database:
+OR if using defaults/mock database:
 ```
 🚀 Server running on port 3000
 📚 API Documentation: http://localhost:3000/api-docs
+⚠️  Using default JWT_SECRET - NOT SECURE FOR PRODUCTION!
+   Set JWT_SECRET environment variable for production use
 ⚠️  Database connection failed, falling back to mock database
 ✅ Mock database initialized (in-memory storage)
 ✅ Redis connected

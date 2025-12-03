@@ -12,6 +12,7 @@ A modern, production-ready Node.js REST API for managing sports data, player sta
 
 ### Core Features
 - ✅ **User Authentication** - JWT-based authentication with secure password hashing
+- ✅ **Zero Configuration** - Works out of the box with sensible defaults (mock DB, default JWT)
 - ✅ **CRUD Operations** - Full REST API for Teams, Players, and Matches
 - ✅ **PostgreSQL Database** - Prisma ORM with type-safe queries
 - ✅ **Mock Database Fallback** - Automatic fallback to in-memory database if PostgreSQL unavailable
@@ -50,7 +51,7 @@ A modern, production-ready Node.js REST API for managing sports data, player sta
 - npm or yarn
 - Docker & Docker Compose (optional, for containerized setup)
 
-**Note:** If PostgreSQL is not available, the application automatically falls back to an in-memory mock database. This is perfect for quick testing, but data will be lost when the server restarts.
+**Note:** The application works with **zero configuration**! If PostgreSQL is not available, it automatically falls back to an in-memory mock database. If JWT_SECRET is not set, it uses a default development secret (with security warnings). This is perfect for quick testing and development, but remember to set proper values for production.
 
 ## 🚀 Quick Start
 
@@ -67,7 +68,7 @@ A modern, production-ready Node.js REST API for managing sports data, player sta
    npm install
    ```
 
-3. **Set up environment variables**
+3. **Set up environment variables** (Optional for quick start)
    ```bash
    cp .env.example .env
    ```
@@ -75,12 +76,17 @@ A modern, production-ready Node.js REST API for managing sports data, player sta
    ```env
    PORT=3000
    NODE_ENV=development
-   DATABASE_URL="postgresql://user:password@localhost:5432/sportsmatch?schema=public"
-   JWT_SECRET=your-super-secret-jwt-key
-   REDIS_HOST=localhost
-   REDIS_PORT=6379
+   DATABASE_URL="postgresql://user:password@localhost:5432/sportsmatch?schema=public"  # Optional
+   JWT_SECRET=your-super-secret-jwt-key  # Optional - uses default for development
+   REDIS_HOST=localhost  # Optional
+   REDIS_PORT=6379  # Optional
    OPENAI_API_KEY=your-openai-api-key  # Optional
    ```
+   
+   **💡 Tip:** You can skip this step entirely! The app will use default values for development:
+   - Default JWT_SECRET (with security warning)
+   - Mock database if DATABASE_URL not set
+   - Default Redis settings (will gracefully fail if Redis unavailable)
 
 4. **Set up the database** (Optional - skip if using mock database)
    ```bash
@@ -330,8 +336,8 @@ The API integrates with OpenAI to generate match predictions. When creating a ma
 |----------|-------------|----------|---------|
 | `PORT` | Server port | No | 3000 |
 | `NODE_ENV` | Environment | No | development |
-| `DATABASE_URL` | PostgreSQL connection string | Yes | - |
-| `JWT_SECRET` | JWT signing secret | Yes | - |
+| `DATABASE_URL` | PostgreSQL connection string | No | Uses mock database |
+| `JWT_SECRET` | JWT signing secret | No | dev-jwt-secret (⚠️ insecure for production) |
 | `JWT_EXPIRES_IN` | Token expiration | No | 7d |
 | `REDIS_HOST` | Redis host | No | localhost |
 | `REDIS_PORT` | Redis port | No | 6379 |

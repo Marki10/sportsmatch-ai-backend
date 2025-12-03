@@ -68,6 +68,10 @@ app.get('/health', (req, res) => {
       status: 'connected',
       note: isMockDatabase() ? 'Using in-memory storage - data will be lost on restart' : undefined,
     },
+    jwt: {
+      usingDefaultSecret: config.isDefaultJwtSecret,
+      note: config.isDefaultJwtSecret ? 'Using default JWT secret - not secure for production' : undefined,
+    },
   });
 });
 
