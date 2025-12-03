@@ -5,6 +5,7 @@ import swaggerUi from 'swagger-ui-express';
 import { config } from './config/env';
 import { errorHandler } from './middleware/error-handler';
 import { generalLimiter } from './middleware/rate-limit';
+import { isMockDatabase } from './database';
 
 // Routes
 import authRoutes from './routes/auth.routes';
@@ -62,6 +63,11 @@ app.get('/health', (req, res) => {
     success: true,
     message: 'Server is running',
     timestamp: new Date().toISOString(),
+    database: {
+      type: isMockDatabase() ? 'mock (in-memory)' : 'postgresql',
+      status: 'connected',
+      note: isMockDatabase() ? 'Using in-memory storage - data will be lost on restart' : undefined,
+    },
   });
 });
 

@@ -5,7 +5,7 @@ dotenv.config();
 interface EnvConfig {
   port: number;
   nodeEnv: string;
-  databaseUrl: string;
+  databaseUrl?: string;
   jwtSecret: string;
   jwtExpiresIn: string;
   redis: {
@@ -28,7 +28,7 @@ function getEnvVar(key: string, defaultValue?: string): string {
 export const config: EnvConfig = {
   port: parseInt(getEnvVar('PORT', '3000'), 10),
   nodeEnv: getEnvVar('NODE_ENV', 'development'),
-  databaseUrl: getEnvVar('DATABASE_URL'),
+  databaseUrl: process.env.DATABASE_URL, // Optional - will use mock if not provided
   jwtSecret: getEnvVar('JWT_SECRET'),
   jwtExpiresIn: getEnvVar('JWT_EXPIRES_IN', '7d'),
   redis: {

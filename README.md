@@ -14,6 +14,7 @@ A modern, production-ready Node.js REST API for managing sports data, player sta
 - ✅ **User Authentication** - JWT-based authentication with secure password hashing
 - ✅ **CRUD Operations** - Full REST API for Teams, Players, and Matches
 - ✅ **PostgreSQL Database** - Prisma ORM with type-safe queries
+- ✅ **Mock Database Fallback** - Automatic fallback to in-memory database if PostgreSQL unavailable
 - ✅ **Redis Caching** - Performance optimization with intelligent cache invalidation
 - ✅ **Rate Limiting** - Protect API endpoints from abuse
 - ✅ **Error Handling** - Centralized error handling middleware
@@ -44,10 +45,12 @@ A modern, production-ready Node.js REST API for managing sports data, player sta
 ## 📋 Prerequisites
 
 - Node.js 20+ 
-- PostgreSQL 16+
+- PostgreSQL 16+ (optional - app will use mock database if unavailable)
 - Redis 7+ (optional, app will run without it)
 - npm or yarn
 - Docker & Docker Compose (optional, for containerized setup)
+
+**Note:** If PostgreSQL is not available, the application automatically falls back to an in-memory mock database. This is perfect for quick testing, but data will be lost when the server restarts.
 
 ## 🚀 Quick Start
 
@@ -79,7 +82,7 @@ A modern, production-ready Node.js REST API for managing sports data, player sta
    OPENAI_API_KEY=your-openai-api-key  # Optional
    ```
 
-4. **Set up the database**
+4. **Set up the database** (Optional - skip if using mock database)
    ```bash
    # Generate Prisma Client
    npm run db:generate
@@ -90,6 +93,8 @@ A modern, production-ready Node.js REST API for managing sports data, player sta
    # Or push schema directly (development)
    npm run db:push
    ```
+   
+   **💡 Tip:** If you don't have PostgreSQL set up, you can skip this step! The app will automatically use a mock in-memory database with sample data.
 
 5. **Start Redis** (optional, but recommended)
    ```bash
