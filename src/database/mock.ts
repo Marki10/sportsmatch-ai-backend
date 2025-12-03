@@ -168,7 +168,9 @@ class MockDatabase {
       const now = new Date();
       const user: MockUser = {
         id,
-        ...args.data,
+        email: args.data.email,
+        password: args.data.password,
+        name: args.data.name !== undefined ? args.data.name : null, // Explicitly set null if not provided
         createdAt: now,
         updatedAt: now,
       };
@@ -177,8 +179,10 @@ class MockDatabase {
       if (args.select) {
         const selected: any = {};
         Object.keys(args.select).forEach((key) => {
-          if (args.select[key] && user.hasOwnProperty(key)) {
-            selected[key] = (user as any)[key];
+          if (args.select[key]) {
+            // Always include selected fields, use null if not present
+            const value = (user as any)[key];
+            selected[key] = value === undefined ? null : value;
           }
         });
         return selected;
