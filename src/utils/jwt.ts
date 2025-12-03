@@ -7,14 +7,21 @@ export interface TokenPayload {
 }
 
 export const generateToken = (payload: TokenPayload): string => {
-  return jwt.sign(payload, config.jwtSecret, {
-    expiresIn: config.jwtExpiresIn,
-  });
+  const options: jwt.SignOptions = {
+    expiresIn: config.jwtExpiresIn as string | number,
+  };
+  
+  return jwt.sign(
+    payload as object,
+    config.jwtSecret,
+    options
+  );
 };
 
 export const verifyToken = (token: string): TokenPayload => {
   try {
-    return jwt.verify(token, config.jwtSecret) as TokenPayload;
+    const decoded = jwt.verify(token, config.jwtSecret);
+    return decoded as TokenPayload;
   } catch (error) {
     throw new Error('Invalid or expired token');
   }

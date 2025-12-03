@@ -19,7 +19,7 @@ const app: Application = express();
 app.use(cors({ origin: config.corsOrigin }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(generalLimiter);
+app.use(generalLimiter); // Rate limiter skips automatically in test environment
 
 // Swagger configuration
 const swaggerOptions = {
