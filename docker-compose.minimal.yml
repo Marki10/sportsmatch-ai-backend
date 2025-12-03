@@ -1,9 +1,7 @@
-version: '3.8'
-
 # Minimal Docker Compose - Zero Configuration Setup
 # Uses mock database, default JWT secret, and works out of the box!
 # 
-# Usage: docker-compose -f docker-compose.minimal.yml up
+# Usage: docker-compose -f docker-compose.minimal.yml up --build
 
 services:
   app:
@@ -24,4 +22,5 @@ services:
     volumes:
       - ./prisma:/app/prisma
     command: node dist/server.js
+
 

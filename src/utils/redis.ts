@@ -1,61 +1,96 @@
 import { createClient } from 'redis';
 import { config } from '../config/env';
 
-const redisClient = createClient({
-  socket: {
-    host: config.redis.host,
-    port: config.redis.port,
-  },
-  password: config.redis.password,
-});
+let redisEnabled = false;
+let connectionAttempted = false;
+let redisClient: ReturnType<typeof createClient> | null = null;
 
-redisClient.on('error', (err) => console.error('Redis Client Error:', err));
-redisClient.on('connect', () => console.log('✅ Redis connected'));
+// Create Redis client only when needed
+function getRedisClient() {
+  if (!redisClient) {
+    redisClient = createClient({
+      socket: {
+        host: config.redis.host,
+        port: config.redis.port,
+        reconnectStrategy: false, // Disable auto-reconnect
+        connectTimeout: 2000, // Fast timeout
+      },
+      password: config.redis.password,
+    });
+
+    // Suppress all errors - Redis is optional
+    redisClient.on('error', () => {
+      redisEnabled = false;
+    });
+    
+    redisClient.on('connect', () => {
+      redisEnabled = true;
+      console.log('✅ Redis connected');
+    });
+  }
+  return redisClient;
+}
 
 export const connectRedis = async (): Promise<void> => {
+  if (connectionAttempted) return; // Only try once
+  
+  connectionAttempted = true;
+  const client = getRedisClient();
+  
   try {
-    await redisClient.connect();
+    // Try to connect with timeout
+    await Promise.race([
+      client.connect(),
+      new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 2000)
+      ),
+    ]);
+    redisEnabled = true;
   } catch (error) {
-    console.error('❌ Redis connection error:', error);
-    // Don't exit - allow app to run without Redis
+    redisEnabled = false;
+    // Completely silent - Redis is optional
   }
 };
 
 export const disconnectRedis = async (): Promise<void> => {
-  if (redisClient.isOpen) {
-    await redisClient.disconnect();
-    console.log('✅ Redis disconnected');
+  if (redisClient && redisClient.isOpen) {
+    try {
+      await redisClient.disconnect();
+      console.log('✅ Redis disconnected');
+    } catch (error) {
+      // Silent
+    }
   }
 };
 
 export const cache = {
   get: async (key: string): Promise<string | null> => {
+    if (!redisEnabled || !redisClient || !redisClient.isOpen) return null;
     try {
-      if (!redisClient.isOpen) return null;
       return await redisClient.get(key);
     } catch (error) {
-      console.error('Redis get error:', error);
+      redisEnabled = false;
       return null;
     }
   },
   set: async (key: string, value: string, expireInSeconds?: number): Promise<void> => {
+    if (!redisEnabled || !redisClient || !redisClient.isOpen) return;
     try {
-      if (!redisClient.isOpen) return;
       if (expireInSeconds) {
         await redisClient.setEx(key, expireInSeconds, value);
       } else {
         await redisClient.set(key, value);
       }
     } catch (error) {
-      console.error('Redis set error:', error);
+      redisEnabled = false;
     }
   },
   delete: async (key: string): Promise<void> => {
+    if (!redisEnabled || !redisClient || !redisClient.isOpen) return;
     try {
-      if (!redisClient.isOpen) return;
       await redisClient.del(key);
     } catch (error) {
-      console.error('Redis delete error:', error);
+      redisEnabled = false;
     }
   },
 };
