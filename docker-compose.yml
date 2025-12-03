@@ -1,28 +1,30 @@
 version: '3.8'
 
 services:
+  # PostgreSQL - Optional: Comment out if you want to use mock database only
   postgres:
     image: postgres:16-alpine
     container_name: sportsmatch-postgres
     environment:
-      POSTGRES_USER: sportsmatch
-      POSTGRES_PASSWORD: sportsmatch123
-      POSTGRES_DB: sportsmatch
+      POSTGRES_USER: ${POSTGRES_USER:-sportsmatch}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sportsmatch123}
+      POSTGRES_DB: ${POSTGRES_DB:-sportsmatch}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sportsmatch"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sportsmatch}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  # Redis - Optional: Comment out if you don't need caching
   redis:
     image: redis:7-alpine
     container_name: sportsmatch-redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -37,25 +39,31 @@ services:
       dockerfile: Dockerfile
     container_name: sportsmatch-api
     environment:
-      NODE_ENV: production
-      PORT: 3000
-      DATABASE_URL: postgresql://sportsmatch:sportsmatch123@postgres:5432/sportsmatch?schema=public
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      JWT_SECRET: your-super-secret-jwt-key-change-in-production
-      JWT_EXPIRES_IN: 7d
-      CORS_ORIGIN: http://localhost:3000
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${PORT:-3000}
+      # Optional: Set DATABASE_URL to use PostgreSQL, otherwise uses mock database
+      DATABASE_URL: ${DATABASE_URL:-postgresql://sportsmatch:sportsmatch123@postgres:5432/sportsmatch?schema=public}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      # Optional: JWT_SECRET - uses default if not set (with warnings)
+      JWT_SECRET: ${JWT_SECRET:-}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:${PORT:-3000}"
+    # Optional dependencies - app will work even if these fail
     depends_on:
       postgres:
         condition: service_healthy
+        required: false
       redis:
         condition: service_healthy
+        required: false
     volumes:
       - ./prisma:/app/prisma
-    command: sh -c "npx prisma migrate deploy && node dist/server.js"
+    # Try migrations, but continue even if they fail (will use mock DB)
+    command: sh -c "npx prisma migrate deploy || echo 'Migrations failed, using mock database' && node dist/server.js"
 
 volumes:
   postgres_data:

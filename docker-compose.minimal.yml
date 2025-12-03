@@ -1,0 +1,27 @@
+version: '3.8'
+
+# Minimal Docker Compose - Zero Configuration Setup
+# Uses mock database, default JWT secret, and works out of the box!
+# 
+# Usage: docker-compose -f docker-compose.minimal.yml up
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sportsmatch-api
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      # No DATABASE_URL = uses mock database
+      # No JWT_SECRET = uses default (with warnings)
+      # No Redis = app works without it
+      CORS_ORIGIN: http://localhost:3000
+    ports:
+      - "3000:3000"
+    # No dependencies - works standalone!
+    volumes:
+      - ./prisma:/app/prisma
+    command: node dist/server.js
+
