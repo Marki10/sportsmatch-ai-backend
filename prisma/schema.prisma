@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Team {
+  id          String   @id @default(uuid())
+  name        String
+  country     String
+  foundedYear Int
+  stadium     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  players     Player[]
+  homeMatches Match[]  @relation("HomeTeam")
+  awayMatches Match[]  @relation("AwayTeam")
+
+  @@map("teams")
+}
+
+model Player {
+  id            String   @id @default(uuid())
+  name          String
+  position      String
+  age           Int
+  goals         Int      @default(0)
+  assists       Int      @default(0)
+  matchesPlayed Int      @default(0)
+  rating        Float?   @default(0)
+  teamId        String
+  team          Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("players")
+}
+
+model Match {
+  id              String    @id @default(uuid())
+  homeTeamId      String
+  awayTeamId      String
+  date            DateTime
+  status          String    @default("scheduled") // scheduled, live, finished
+  homeScore       Int?
+  awayScore       Int?
+  prediction      Json?     // Store AI prediction as JSON
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  homeTeam        Team      @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam        Team      @relation("AwayTeam", fields: [awayTeamId], references: [id])
+
+  @@map("matches")
+}
